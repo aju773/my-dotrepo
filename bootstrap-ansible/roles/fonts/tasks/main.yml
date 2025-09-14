@@ -1,0 +1,26 @@
+---
+- name: Create fonts directory
+  file:
+    path: "/home/{{ user_name }}/.local/share/fonts"
+    state: directory
+    mode: 0755
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+
+- name: Download JetBrains Mono Nerd Font
+  get_url:
+    url: "{{ nerd_font_url }}"
+    dest: "/tmp/JetBrainsMono.zip"
+
+- name: Extract JetBrains Mono Nerd Font
+  unarchive:
+    src: "/tmp/JetBrainsMono.zip"
+    dest: "/home/{{ user_name }}/.local/share/fonts"
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+  become_user: "{{ user_name }}"
+
+- name: Clean up font zip
+  file:
+    path: "/tmp/JetBrainsMono.zip"
+    state: absent

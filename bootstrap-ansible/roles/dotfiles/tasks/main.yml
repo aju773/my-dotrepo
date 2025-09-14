@@ -1,0 +1,13 @@
+---
+- name: Clone dotfiles repo
+  git:
+    repo: "{{ dotfiles_repo }}"
+    dest: "{{ dotfiles_path }}"
+    update: yes
+    version: main
+
+- name: Symlink dotfiles with stow
+  community.general.stow:
+    src: "{{ dotfiles_path }}/.config"
+    dest: "/home/{{ user_name }}/.config"
+    state: present

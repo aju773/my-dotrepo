@@ -1,0 +1,44 @@
+---
+- name: Update system
+  dnf:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: Install core packages
+  dnf:
+    name:
+      - git
+      - curl
+      - rsync
+      - alacritty
+      - kitty
+      - vlc
+      - gedit
+      - flatpak
+      - neovim
+      - tmux
+      - starship
+      - rpm
+      - htop
+      - zsh
+    state: present
+
+- name: Remove unwanted GNOME apps
+  dnf:
+    name:
+      - gnome-calendar
+      - gnome-logs
+      - gnome-tour
+      - gnome-contacts
+      - gnome-photos
+      - gnome-maps
+      - gnome-characters
+      - gnome-boxes
+      - gnome-clocks
+      - gnome-system-monitor
+      - gnome-weather
+      - totem
+      - abrt
+      - gnome-parental-controls
+    state: absent

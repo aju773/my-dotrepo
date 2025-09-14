@@ -1,0 +1,6 @@
+---
+user_name: "{{ lookup('env','USER') }}"
+dotfiles_repo: "https://github.com/aju773/my-dotrepo.git"
+dotfiles_path: "/home/{{ user_name }}/my-dotrepo"
+nerd_font_url: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/JetBrainsMono.zip"
+protonvpn_repo: "https://repo.protonvpn.com/fedora/protonvpn-stable.repo"

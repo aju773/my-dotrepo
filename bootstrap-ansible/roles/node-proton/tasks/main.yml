@@ -1,0 +1,32 @@
+---
+- name: Install NVM
+  shell: >
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+  args:
+    creates: "/home/{{ user_name }}/.nvm"
+
+- name: Load NVM and install Node.js 22
+  shell: >
+    . /home/{{ user_name }}/.nvm/nvm.sh &&
+    nvm install 22 &&
+    nvm use 22
+  args:
+    executable: /bin/bash
+  environment:
+    HOME: "/home/{{ user_name }}"
+    USER: "{{ user_name }}"
+
+- name: Verify Node.js
+  shell: "node -v && npm -v"
+  args:
+    executable: /bin/bash
+
+- name: Install ProtonVPN repo
+  get_url:
+    url: "{{ protonvpn_repo }}"
+    dest: "/etc/yum.repos.d/protonvpn.repo"
+
+- name: Install ProtonVPN client
+  dnf:
+    name: protonvpn
+    state: present
