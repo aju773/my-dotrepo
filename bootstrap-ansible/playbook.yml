@@ -2,6 +2,8 @@
 - name: Bootstrap Fedora System
   hosts: localhost
   become: yes
+  collections:
+    - community.general
   vars_files:
     - group_vars/all.yml
   roles:
