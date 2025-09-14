@@ -1,0 +1,44 @@
+# OS junk
+.DS_Store
+Thumbs.db
+*.~ 
+
+# Vim / Neovim swap and backup files
+*.swp
+*.swo
+*.swn
+*.un~ 
+*.bak
+*.tmp
+
+# Emacs
+*~
+\#*\#
+
+# IDE / Editor folders
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# Node / NVM / npm
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Temporary files created by scripts
+*.tmp
+*.bak
+*.old
+
+# Stow state (optional, if using stow to symlink configs)
+.stow-local-state
+
+# Ignore Git submodules (if any)
+.gitmodules
+
+.config/tmux/plugins/*
+!.config/tmux/plugins/.gitkeep
+
