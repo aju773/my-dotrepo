@@ -15,7 +15,7 @@
   command: >
     stow -v --target="{{ dotfiles_dir }}" --adopt {{ item }}
   args:
-    chdir: "{{ dotfiles_repo_path }}/.config"
+    chdir: "{{ dotfiles_repo_path }}"
   loop:
     - alacritty
     - ghostty
