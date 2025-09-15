@@ -18,7 +18,6 @@
       - flatpak
       - neovim
       - tmux
-      - starship
       - rpm
       - htop
       - zsh
@@ -42,3 +41,16 @@
       - abrt
       - gnome-parental-controls
     state: absent
+
+- name: Install Starship prompt
+  shell: curl -sS https://starship.rs/install.sh | sh
+  args:
+    creates: /usr/local/bin/starship
+  become: false
+
+- name: Ensure starship is initialized in bashrc
+  lineinfile:
+    path: "{{ lookup('env','HOME') }}/.bashrc"
+    line: 'eval "$(starship init bash)"'
+    state: present
+  become: false

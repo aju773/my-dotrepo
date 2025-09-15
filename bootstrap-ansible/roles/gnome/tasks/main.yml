@@ -1,50 +1,52 @@
 ---
-- name: Show battery percentage
+# roles/gnome/tasks/main.yml
+
+- name: "Show battery percentage"
+  command: gsettings set org.gnome.desktop.interface show-battery-percentage true
+  become: yes
+
+- name: "Set dark mode"
+  command: gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+  become: yes
+
+- name: "Enable Do Not Disturb"
+  command: gsettings set org.gnome.desktop.notifications show-banners false
+  become: yes
+
+- name: "Disable App Search"
+  command: gsettings set org.gnome.shell always-show-apps false
+  become: yes
+
+- name: "Enable Wellbeing: Eyesight Reminders"
+  command: gsettings set org.gnome.desktop.wellbeing eyes-reminders true
+  become: yes
+
+- name: "Enable Wellbeing: Movement Reminders"
+  command: gsettings set org.gnome.desktop.wellbeing movement-reminders true
+  become: yes
+
+- name: "Disable File History"
+  command: gsettings set org.gnome.desktop.privacy remember-recent-files false
+  become: yes
+
+- name: "Add custom keyboard shortcut: Super + Return -> Open Ghosty"
   command: >
-    gsettings set org.gnome.desktop.interface show-battery-percentage true
-  become: false
+    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings
+    "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
+  become: yes
 
-- name: Set dark mode
-  command: >
-    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-  become: false
+- name: "Set custom keyboard shortcut details"
+  block:
+    - command: gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Open Ghosty'
+    - command: gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'ghosty'
+    - command: gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Super>Return'
+  become: yes
 
-- name: Enable Do Not Disturb
-  command: >
-    gsettings set org.gnome.desktop.notifications show-banners false
-  become: false
+- name: "Set navigation workspace shortcuts"
+  block:
+    - command: gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-1 "['<Super>1']"
+    - command: gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-2 "['<Super>2']"
+    - command: gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-3 "['<Super>3']"
+    - command: gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-4 "['<Super>4']"
+  become: yes
 
-- name: Disable app search in Activities overview
-  command: >
-    gsettings set org.gnome.shell always-show-apps false
-  become: false
-
-- name: Enable Wellbeing: Eyesight Reminders
-  command: >
-    gsettings set org.gnome.desktop.wellbeing eyesight-reminders true
-  become: false
-
-- name: Enable Wellbeing: Movement Reminders
-  command: >
-    gsettings set org.gnome.desktop.wellbeing movement-reminders true
-  become: false
-
-- name: Turn off File History (gnome-user-share)
-  command: >
-    gsettings set org.gnome.settings-daemon.plugins.housekeeping active false
-  become: false
-
-- name: Set custom keyboard shortcut: Super+Return → Open Ghosty Terminal
-  shell: |
-    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
-    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Ghosty'
-    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'ghosty'
-    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Super>Return'
-  become: false
-
-- name: Set workspace switching shortcuts Super+1..4
-  shell: |
-    for i in 1 2 3 4; do
-      gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-$i "['<Super>$i']"
-    done
-  become: false

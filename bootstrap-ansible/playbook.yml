@@ -1,7 +1,7 @@
 ---
 - name: Bootstrap Fedora System
   hosts: localhost
-  become: yes
+  become: true
   collections:
     - community.general
   vars_files:
