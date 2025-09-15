@@ -5,69 +5,15 @@
     state: present
   become: true
 
-- name: Stat .config folder next to playbook (repo root / .config)
-  stat:
-    path: "{{ playbook_dir }}/../.config"
-  register: playbook_config_stat
-
-- name: Stat fallback clone path
-  stat:
-    path: "{{ dotfiles_clone_fallback }}"
-  register: fallback_stat
-
-- name: Use fallback clone if present
-  set_fact:
-    dotfiles_clone_path: "{{ dotfiles_clone_fallback }}"
-  when: fallback_stat.stat.exists
-
-- name: Use playbook parent clone if fallback not present but repo next to playbook is present
-  set_fact:
-    dotfiles_clone_path: "{{ playbook_dir }}/.."
-  when:
-    - not (dotfiles_clone_path is defined)
-    - playbook_config_stat.stat.exists
-
-- name: Clone dotfiles to fallback if no clone chosen yet
+- name: Clone dotfiles repo into ~/my-dotrepo
   git:
-    repo: "{{ dotfiles_repo_url }}"
-    dest: "{{ dotfiles_clone_fallback }}"
+    repo: "https://github.com/aju773/my-dotrepo.git"
+    dest: "/home/{{ user_name }}/my-dotrepo"
     version: main
     update: yes
   become: false
-  when: dotfiles_clone_path is not defined
-  register: clone_result
 
-- name: Set clone path to fallback after successful clone
-  set_fact:
-    dotfiles_clone_path: "{{ dotfiles_clone_fallback }}"
-  when:
-    - dotfiles_clone_path is not defined
-    - clone_result is defined
-    - clone_result.changed or clone_result.after is defined
-
-- name: Fail if no dotfiles clone could be determined
-  fail:
-    msg: >
-      Could not find or clone dotfiles repo. Expected .config at either:
-      - {{ playbook_dir }}/../.config
-      - or cloned to {{ dotfiles_clone_fallback }} from {{ dotfiles_repo_url }}
-  when: dotfiles_clone_path is not defined
-
-- name: Set dotfiles_source (the .config folder inside the clone)
-  set_fact:
-    dotfiles_source: "{{ dotfiles_clone_path }}/.config"
-
-- name: Verify dotfiles_source exists
-  stat:
-    path: "{{ dotfiles_source }}"
-  register: dotfiles_source_stat
-
-- name: Fail if dotfiles_source missing
-  fail:
-    msg: "Dotfiles source not found at {{ dotfiles_source }}. Check your repository layout (should contain a top-level .config directory)."
-  when: not dotfiles_source_stat.stat.exists
-
-- name: Ensure user's home .config exists (create if missing)
+- name: Ensure ~/.config exists as a directory
   file:
     path: "{{ home_dir }}/.config"
     state: directory
@@ -76,64 +22,32 @@
     mode: '0755'
   become: false
 
-- name: Stat user's ~/.config (re-check)
-  stat:
-    path: "{{ home_dir }}/.config"
-  register: user_config_stat
-  become: false
-
-- name: Backup existing ~/.config if it is a directory (and not a symlink)
-  command: >
-    mv "{{ home_dir }}/.config" "{{ home_dir }}/.config.bak.{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
-  when:
-    - user_config_stat.stat.exists
-    - not user_config_stat.stat.islnk
-  become: false
-
-- name: Recreate ~/.config after backup (ensure empty dir for stow target)
+# OPTIONAL: clean up bad symlinks that stow previously dumped into ~/
+- name: Remove stray symlinks from $HOME (from old stow runs)
   file:
-    path: "{{ home_dir }}/.config"
-    state: directory
-    owner: "{{ user_name }}"
-    group: "{{ user_name }}"
-    mode: '0755'
+    path: "{{ home_dir }}/{{ item }}"
+    state: absent
+  loop:
+    - alacritty
+    - ghostty
+    - kitty
+    - nvim
+    - tmux
+    - starship.toml
   become: false
 
-- name: Ensure .config package directory exists inside clone (safety)
-  file:
-    path: "{{ dotfiles_source }}"
-    state: directory
-  become: false
-
-- name: Stow .config package into user's home, adopting existing files (runs as user)
+- name: Stow repo .config contents into ~/.config
   command: >
-    stow -v --adopt -d "{{ dotfiles_clone_path }}" -t "{{ home_dir }}" ".config"
+    stow --verbose --adopt
+         --dir="/home/{{ user_name }}/my-dotrepo"
+         --target="{{ home_dir }}/.config"
+         .config
   args:
-    chdir: "{{ dotfiles_clone_path }}"
+    chdir: "/home/{{ user_name }}/my-dotrepo"
   become: false
   register: stow_result
-  failed_when: stow_result.rc != 0 and "'WARNING! stowing .config would cause conflicts' in (stow_result.stderr | default(''))"
-  # note: we let stow's own conflicts fail if not adoptable; adopt should usually resolve them
 
-- name: Ensure ownership of cloned repo is user's (if adopt moved files into clone)
-  file:
-    path: "{{ dotfiles_clone_path }}"
-    state: directory
-    recurse: yes
-    owner: "{{ user_name }}"
-    group: "{{ user_name }}"
-  become: true
-  when: stow_result is defined and stow_result.changed
-
-- name: Verify critical symlinks exist in target (sanity check)
-  stat:
-    path: "{{ home_dir }}/.config/nvim"
-  register: nvim_stat
-  become: false
-
-- name: Fail if critical symlinks are not present after stow
-  fail:
-    msg: "stow failed to produce expected symlinks (e.g. ~/.config/nvim not present). Check {{ dotfiles_clone_path }} and stow output: {{ stow_result.stderr | default('') }}"
-  when: not nvim_stat.stat.exists
-  become: false
+- name: Show stow output for debugging
+  debug:
+    var: stow_result
 
