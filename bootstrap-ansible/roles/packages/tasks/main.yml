@@ -42,15 +42,16 @@
       - gnome-parental-controls
     state: absent
 
-- name: Install Starship prompt
+- name: Install Starship prompt (user installer)
   shell: curl -sS https://starship.rs/install.sh | sh
   args:
     creates: /usr/local/bin/starship
   become: false
 
-- name: Ensure starship is initialized in bashrc
+- name: Ensure starship init is present in user's .bashrc
   lineinfile:
-    path: "{{ lookup('env','HOME') }}/.bashrc"
+    path: "{{ home_dir }}/.bashrc"
     line: 'eval "$(starship init bash)"'
     state: present
+    create: yes
   become: false

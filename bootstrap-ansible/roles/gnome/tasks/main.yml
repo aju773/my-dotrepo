@@ -13,16 +13,19 @@
   command: gsettings set org.gnome.desktop.notifications show-banners false
   become: yes
 
-- name: "Disable App Search"
+- name: "Disable App Search (only if available)"
   command: gsettings set org.gnome.shell always-show-apps false
+  when: "'always-show-apps' in lookup('pipe', 'gsettings list-keys org.gnome.shell')"
   become: yes
 
-- name: "Enable Wellbeing: Eyesight Reminders"
+- name: "Enable Wellbeing: Eyesight Reminders (only if available)"
   command: gsettings set org.gnome.desktop.wellbeing eyes-reminders true
+  when: "'org.gnome.desktop.wellbeing' in lookup('pipe', 'gsettings list-schemas')"
   become: yes
 
-- name: "Enable Wellbeing: Movement Reminders"
+- name: "Enable Wellbeing: Movement Reminders (only if available)"
   command: gsettings set org.gnome.desktop.wellbeing movement-reminders true
+  when: "'org.gnome.desktop.wellbeing' in lookup('pipe', 'gsettings list-schemas')"
   become: yes
 
 - name: "Disable File History"
@@ -49,4 +52,3 @@
     - command: gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-3 "['<Super>3']"
     - command: gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-4 "['<Super>4']"
   become: yes
-

@@ -11,14 +11,12 @@
   get_url:
     url: "{{ nerd_font_url }}"
     dest: "/tmp/JetBrainsMono.zip"
+    mode: '0644'
 
 - name: Extract JetBrains Mono Nerd Font
-  unarchive:
-    src: "/tmp/JetBrainsMono.zip"
-    dest: "/home/{{ user_name }}/.local/share/fonts"
-    remote_src: yes
-    extra_opts: [--strip-components=1]
-  become_user: "{{ user_name }}"
+  command: unzip -o /tmp/JetBrainsMono.zip -d {{ home_dir }}/.local/share/fonts
+  args: 
+    creates: "{{ home_dir }}/.local/share/fonts/JetBrains Mono Nerd Font Complete.ttf"
 
 - name: Clean up font zip
   file:

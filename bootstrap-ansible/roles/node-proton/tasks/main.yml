@@ -1,32 +1,54 @@
 ---
 - name: Install NVM
-  shell: >
+  shell: |
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
   args:
-    creates: "/home/{{ user_name }}/.nvm"
+    creates: "{{ home_dir }}/.nvm/nvm.sh"
+  environment:
+    HOME: "{{ home_dir }}"
+  become: false
 
 - name: Load NVM and install Node.js 22
-  shell: >
-    . /home/{{ user_name }}/.nvm/nvm.sh &&
-    nvm install 22 &&
-    nvm use 22
+  shell: |
+    export NVM_DIR="{{ home_dir }}/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    nvm install 22
+    nvm alias default 22
   args:
     executable: /bin/bash
   environment:
-    HOME: "/home/{{ user_name }}"
-    USER: "{{ user_name }}"
+    HOME: "{{ home_dir }}"
+  become: false
 
-- name: Verify Node.js
-  shell: "node -v && npm -v"
+- name: Verify Node.js version
+  shell: |
+    export NVM_DIR="{{ home_dir }}/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    node -v
   args:
     executable: /bin/bash
+  register: node_version
+  changed_when: false
 
-- name: Install ProtonVPN repo
+- debug:
+    msg: "Node.js installed with version {{ node_version.stdout }}"
+
+- name: Download ProtonVPN repo package
   get_url:
-    url: "{{ protonvpn_repo }}"
-    dest: "/etc/yum.repos.d/protonvpn.repo"
+    url: "https://repo.protonvpn.com/fedora-{{ ansible_facts.distribution_major_version }}-stable/protonvpn-stable-release/protonvpn-stable-release-1.0.3-1.noarch.rpm"
+    dest: "/tmp/protonvpn-stable-release.rpm"
+    mode: '0644'
 
-- name: Install ProtonVPN client
+- name: Install ProtonVPN repo package
   dnf:
-    name: protonvpn
+    name: "/tmp/protonvpn-stable-release.rpm"
+    state: present
+
+- name: Refresh DNF cache
+  dnf:
+    update_cache: yes
+
+- name: Install ProtonVPN desktop app
+  dnf:
+    name: proton-vpn-gnome-desktop
     state: present
