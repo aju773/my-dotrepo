@@ -11,4 +11,20 @@ blur = true
 option_as_alt = "Both"
 
 [font]
-size = 12
+size = 16
+
+[font.normal]
+family = "Google Sans Mono"
+style = "Regular"
+
+[font.bold]
+family = "Google Sans Mono"
+style = "Bold"
+
+[font.italic]
+family = "Google Sans Mono"
+style = "Italic"
+
+[font.bold_italic]
+family = "Google Sans Mono"
+style = "Bold Italic"

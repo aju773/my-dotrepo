@@ -21,7 +21,73 @@
       - rpm
       - htop
       - zsh
+      - dnf-plugins-core
     state: present
+
+- name: Enable Ghostty COPR
+  command: dnf copr enable -y scottames/ghostty
+  args:
+    creates: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:scottames:ghostty.repo
+
+- name: Install Ghostty
+  dnf:
+    name: ghostty
+    state: present
+
+- name: Add Dangerzone repo
+  command: dnf config-manager --add-repo https://packages.freedom.press/yum-tools-prod/dangerzone/dangerzone.repo
+  args:
+    creates: /etc/yum.repos.d/dangerzone.repo
+
+- name: Install Dangerzone
+  dnf:
+    name: dangerzone
+    state: present
+
+- name: Install Foliate
+  dnf:
+    name: foliate
+    state: present
+
+- name: Import Microsoft GPG key
+  rpm_key:
+    state: present
+    key: https://packages.microsoft.com/keys/microsoft.asc
+
+- name: Add VS Code repository
+  copy:
+    dest: /etc/yum.repos.d/vscode.repo
+    content: |
+      [code]
+      name=Visual Studio Code
+      baseurl=https://packages.microsoft.com/yumrepos/vscode
+      enabled=1
+      gpgcheck=1
+      gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+
+- name: Install VS Code
+  dnf:
+    name: code
+    state: present
+
+- name: Install Google Chrome
+  dnf:
+    name: https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
+    state: present
+
+- name: Ensure Flathub remote exists
+  flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+
+- name: Install Flatpak applications
+  flatpak:
+    name:
+      - md.obsidian.Obsidian
+      - org.telegram.desktop
+    state: present
+    remote: flathub
 
 - name: Remove unwanted GNOME apps
   dnf:
