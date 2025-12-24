@@ -34,6 +34,16 @@
     name: ghostty
     state: present
 
+- name: Enable Yazi COPR
+  command: dnf copr enable -y varlad/yazi
+  args:
+    creates: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:varlad:yazi.repo
+
+- name: Install Yazi
+  dnf:
+    name: yazi
+    state: present
+
 - name: Add Dangerzone repo
   command: dnf config-manager --add-repo https://packages.freedom.press/yum-tools-prod/dangerzone/dangerzone.repo
   args:
