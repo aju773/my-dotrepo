@@ -10,7 +10,7 @@
     repo: "https://github.com/aju773/my-dotrepo.git"
     dest: "/home/{{ user_name }}/my-dotrepo"
     version: main
-    update: yes
+    update: no
   become: false
 
 - name: Ensure ~/.config exists as a directory

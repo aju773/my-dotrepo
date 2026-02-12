@@ -45,9 +45,14 @@
     state: present
 
 - name: Add Dangerzone repo
-  command: dnf config-manager --add-repo https://packages.freedom.press/yum-tools-prod/dangerzone/dangerzone.repo
+  command: dnf config-manager addrepo --from-repofile=https://packages.freedom.press/yum-tools-prod/dangerzone/dangerzone.repo
   args:
     creates: /etc/yum.repos.d/dangerzone.repo
+
+- name: Import Dangerzone GPG key
+  rpm_key:
+    state: present
+    key: https://packages.freedom.press/yum-tools-prod/dangerzone/fpf-yum-tools-archive-keyring.gpg
 
 - name: Install Dangerzone
   dnf:
@@ -103,23 +108,14 @@
   dnf:
     name:
       - gnome-calendar
-      - gnome-logs
-      - gnome-tour
-      - gnome-contacts
-      - gnome-photos
-      - gnome-maps
       - gnome-characters
-      - gnome-boxes
       - gnome-clocks
       - gnome-system-monitor
-      - gnome-weather
-      - totem
-      - abrt
-      - gnome-parental-controls
     state: absent
+  ignore_errors: yes
 
 - name: Install Starship prompt (user installer)
-  shell: curl -sS https://starship.rs/install.sh | sh
+  shell: curl -sS https://starship.rs/install.sh | sh -s -- -y
   args:
     creates: /usr/local/bin/starship
   become: false

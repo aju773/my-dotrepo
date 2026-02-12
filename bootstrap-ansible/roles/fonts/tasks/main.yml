@@ -7,6 +7,11 @@
     owner: "{{ user_name }}"
     group: "{{ user_name }}"
 
+- name: Ensure unzip is installed
+  dnf:
+    name: unzip
+    state: present
+
 - name: Download JetBrains Mono Nerd Font
   get_url:
     url: "{{ nerd_font_url }}"

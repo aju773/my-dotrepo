@@ -43,6 +43,7 @@
   dnf:
     name: "/tmp/protonvpn-stable-release.rpm"
     state: present
+    disable_gpg_check: yes
 
 - name: Refresh DNF cache
   dnf:
@@ -50,5 +51,6 @@
 
 - name: Install ProtonVPN desktop app
   dnf:
-    name: proton-vpn-gnome-desktop
+    name: proton-vpn
     state: present
+  ignore_errors: yes

@@ -1,49 +1,69 @@
 ---
 # roles/gnome/tasks/main.yml
+# All gsettings commands must run as the logged-in user with access to
+# the user's D-Bus session bus, not as root.
 
 - name: "Show battery percentage"
   command: gsettings set org.gnome.desktop.interface show-battery-percentage true
-  become: yes
+  become: false
+  environment:
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_uid }}/bus"
 
 - name: "Set dark mode"
   command: gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-  become: yes
+  become: false
+  environment:
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_uid }}/bus"
 
 - name: "Enable Do Not Disturb"
   command: gsettings set org.gnome.desktop.notifications show-banners false
-  become: yes
+  become: false
+  environment:
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_uid }}/bus"
 
 - name: "Disable App Search (only if available)"
   command: gsettings set org.gnome.shell always-show-apps false
   when: "'always-show-apps' in lookup('pipe', 'gsettings list-keys org.gnome.shell')"
-  become: yes
+  become: false
+  environment:
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_uid }}/bus"
 
 - name: "Enable Wellbeing: Eyesight Reminders (only if available)"
   command: gsettings set org.gnome.desktop.wellbeing eyes-reminders true
   when: "'org.gnome.desktop.wellbeing' in lookup('pipe', 'gsettings list-schemas')"
-  become: yes
+  become: false
+  environment:
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_uid }}/bus"
 
 - name: "Enable Wellbeing: Movement Reminders (only if available)"
   command: gsettings set org.gnome.desktop.wellbeing movement-reminders true
   when: "'org.gnome.desktop.wellbeing' in lookup('pipe', 'gsettings list-schemas')"
-  become: yes
+  become: false
+  environment:
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_uid }}/bus"
 
 - name: "Disable File History"
   command: gsettings set org.gnome.desktop.privacy remember-recent-files false
-  become: yes
+  become: false
+  environment:
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_uid }}/bus"
 
 - name: "Add custom keyboard shortcut: Super + Return -> Open Ghosty"
   command: >
     gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings
     "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
-  become: yes
+  become: false
+  environment:
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_uid }}/bus"
 
 - name: "Set custom keyboard shortcut details"
   block:
     - command: gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Open Ghosty'
     - command: gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'ghostty'
     - command: gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Super>Return'
-  become: yes
+  become: false
+  environment:
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_uid }}/bus"
 
 - name: "Set navigation workspace shortcuts"
   block:
@@ -51,4 +71,6 @@
     - command: gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-2 "['<Super>2']"
     - command: gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-3 "['<Super>3']"
     - command: gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-4 "['<Super>4']"
-  become: yes
+  become: false
+  environment:
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_uid }}/bus"
